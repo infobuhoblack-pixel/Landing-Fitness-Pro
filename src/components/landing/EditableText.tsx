@@ -7,6 +7,7 @@ interface EditableTextProps {
   onSave: (value: string) => void;
   as?: "span" | "p" | "h1" | "h2" | "h3" | "h4" | "div";
   className?: string;
+  style?: React.CSSProperties;
 }
 
 export function EditableText({ value, onSave, as: Tag = "span", className }: EditableTextProps) {
