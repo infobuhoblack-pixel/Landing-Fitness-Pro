@@ -21,7 +21,7 @@ export function EditableText({ value, onSave, as: Tag = "span", className, style
   }, [value]);
 
   if (!editMode) {
-    return <Tag className={className}>{value}</Tag>;
+    return <Tag className={className} style={style}>{value}</Tag>;
   }
 
   return (
