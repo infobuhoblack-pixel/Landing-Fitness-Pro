@@ -10,7 +10,7 @@ interface EditableTextProps {
   style?: React.CSSProperties;
 }
 
-export function EditableText({ value, onSave, as: Tag = "span", className }: EditableTextProps) {
+export function EditableText({ value, onSave, as: Tag = "span", className, style }: EditableTextProps) {
   const { editMode } = useSite();
   const ref = useRef<HTMLElement>(null);
 
