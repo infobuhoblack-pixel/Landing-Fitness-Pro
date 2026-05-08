@@ -12,6 +12,7 @@ export interface SiteContent {
   programs: Array<{ name: T; price: string; features: T; cta: T; ctaUrl: string; highlighted: boolean }>;
   gallery: Array<{ src: string; alt: string }>;
   testimonials: Array<{ name: string; initials: string; text: T; rating: number }>;
+  faq: Array<{ question: T; answer: T }>;
   ctaFinal: { title: T; subtitle: T; cta: T; ctaUrl: string };
   footer: { email: string; phone: string; instagram: string; facebook: string; youtube: string };
 }
@@ -134,6 +135,44 @@ export const defaultContent: SiteContent = {
         fr: "Professionnalisme total. Les résultats parlent d'eux-mêmes.",
       },
       rating: 5,
+    },
+  ],
+  faq: [
+    {
+      question: {
+        es: "¿Cuánto tiempo tardo en ver resultados?",
+        en: "How long until I see results?",
+        fr: "Combien de temps pour voir des résultats?",
+      },
+      answer: {
+        es: "La mayoría de nuestros clientes notan cambios visibles en las primeras 3-4 semanas siguiendo el plan.",
+        en: "Most clients see visible changes within the first 3-4 weeks following the plan.",
+        fr: "La plupart des clients voient des changements visibles en 3-4 semaines.",
+      },
+    },
+    {
+      question: {
+        es: "¿Necesito ir al gimnasio?",
+        en: "Do I need a gym?",
+        fr: "Ai-je besoin d'une salle de sport?",
+      },
+      answer: {
+        es: "No necesariamente. Adaptamos las rutinas a tu equipamiento, ya sea casa o gimnasio.",
+        en: "Not necessarily. We adapt routines to your equipment, home or gym.",
+        fr: "Pas nécessairement. Nous adaptons les routines à ton équipement.",
+      },
+    },
+    {
+      question: {
+        es: "¿Puedo cancelar en cualquier momento?",
+        en: "Can I cancel anytime?",
+        fr: "Puis-je annuler à tout moment?",
+      },
+      answer: {
+        es: "Sí, sin compromiso. Puedes cancelar tu plan cuando quieras.",
+        en: "Yes, no commitment. Cancel anytime.",
+        fr: "Oui, sans engagement. Annule quand tu veux.",
+      },
     },
   ],
   ctaFinal: {
