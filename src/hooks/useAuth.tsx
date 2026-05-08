@@ -7,6 +7,7 @@ interface AuthCtx {
   user: User | null;
   isAdmin: boolean;
   loading: boolean;
+  authReady: boolean;
   signOut: () => Promise<void>;
 }
 
