@@ -1,65 +1,50 @@
-import { createContext, useContext, useEffect, useState, ReactNode, useCallback } from "react";
+import { createContext, useContext, useState, ReactNode, useCallback } from "react";
 import { Lang } from "@/lib/i18n";
 import { SiteContent, defaultContent } from "@/lib/siteContent";
-import { supabase } from "@/integrations/supabase/client";
 
 interface SiteContextType {
   content: SiteContent;
-  loading: boolean;
-  saveContent: (next: SiteContent) => Promise<{ error: string | null }>;
+  setContent: React.Dispatch<React.SetStateAction<SiteContent>>;
+  resetContent: () => void;
   language: Lang;
   setLanguage: (lang: Lang) => void;
+  editMode: boolean;
+  setEditMode: (mode: boolean) => void;
 }
 
 const SiteContext = createContext<SiteContextType>(null!);
+
 export const useSite = () => useContext(SiteContext);
 
+const STORAGE_KEY = "fitness-site-content";
 const LANG_KEY = "fitness-lang";
 
-function mergeContent(saved: any): SiteContent {
-  if (!saved || typeof saved !== "object" || Object.keys(saved).length === 0) return defaultContent;
-  return { ...defaultContent, ...saved };
+function loadContent(): SiteContent {
+  try {
+    const saved = localStorage.getItem(STORAGE_KEY);
+    if (saved) {
+      const parsed = JSON.parse(saved);
+      return { ...defaultContent, ...parsed };
+    }
+  } catch {
+    // ignore
+  }
+  return defaultContent;
 }
 
 export function SiteProvider({ children }: { children: ReactNode }) {
-  const [content, setContent] = useState<SiteContent>(defaultContent);
-  const [loading, setLoading] = useState(true);
+  const [content, setContentState] = useState<SiteContent>(loadContent);
   const [language, setLangState] = useState<Lang>(
     () => (localStorage.getItem(LANG_KEY) as Lang) || "es"
   );
+  const [editMode, setEditMode] = useState(false);
 
-  // Initial fetch
-  useEffect(() => {
-    let mounted = true;
-    (async () => {
-      const { data, error } = await supabase
-        .from("site_content")
-        .select("content")
-        .limit(1)
-        .maybeSingle();
-      if (mounted) {
-        if (!error && data) setContent(mergeContent(data.content));
-        setLoading(false);
-      }
-    })();
-
-    // Realtime subscription so admin changes appear instantly
-    const channel = supabase
-      .channel("site_content_changes")
-      .on(
-        "postgres_changes",
-        { event: "*", schema: "public", table: "site_content" },
-        (payload) => {
-          const next = (payload.new as any)?.content;
-          if (next) setContent(mergeContent(next));
-        }
-      )
-      .subscribe();
-
-    return () => {
-      mounted = false;
-      supabase.removeChannel(channel);
-    };
+  const setContent: React.Dispatch<React.SetStateAction<SiteContent>> = useCallback((action) => {
+    setContentState((prev) => {
+      const next = typeof action === "function" ? action(prev) : action;
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(next));
+      return next;
+    });
   }, []);
 
   const setLanguage = useCallback((lang: Lang) => {
@@ -67,29 +52,15 @@ export function SiteProvider({ children }: { children: ReactNode }) {
     localStorage.setItem(LANG_KEY, lang);
   }, []);
 
-  const saveContent = useCallback(async (next: SiteContent) => {
-    // Get the singleton row id
-    const { data: existing } = await supabase
-      .from("site_content")
-      .select("id")
-      .limit(1)
-      .maybeSingle();
-    if (existing?.id) {
-      const { error } = await supabase
-        .from("site_content")
-        .update({ content: next as any, updated_at: new Date().toISOString() })
-        .eq("id", existing.id);
-      if (error) return { error: error.message };
-    } else {
-      const { error } = await supabase.from("site_content").insert({ content: next as any });
-      if (error) return { error: error.message };
-    }
-    setContent(next);
-    return { error: null };
+  const resetContent = useCallback(() => {
+    localStorage.removeItem(STORAGE_KEY);
+    setContentState(defaultContent);
   }, []);
 
   return (
-    <SiteContext.Provider value={{ content, loading, saveContent, language, setLanguage }}>
+    <SiteContext.Provider
+      value={{ content, setContent, resetContent, language, setLanguage, editMode, setEditMode }}
+    >
       {children}
     </SiteContext.Provider>
   );

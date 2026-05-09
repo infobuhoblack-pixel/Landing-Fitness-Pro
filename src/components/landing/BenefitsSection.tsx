@@ -1,4 +1,5 @@
 import { useSite } from "@/contexts/SiteContext";
+import { EditableText } from "./EditableText";
 import { Zap, Target, TrendingUp } from "lucide-react";
 import { useInView } from "@/hooks/useInView";
 import { useRef } from "react";
@@ -6,7 +7,7 @@ import { useRef } from "react";
 const iconMap: Record<string, React.ComponentType<any>> = { Zap, Target, TrendingUp };
 
 export function BenefitsSection() {
-  const { content, language } = useSite();
+  const { content, setContent, language } = useSite();
   const ref = useRef<HTMLElement>(null);
   const inView = useInView(ref);
 
@@ -17,8 +18,8 @@ export function BenefitsSection() {
           {language === "es" ? "¿Por qué elegirnos?" : language === "en" ? "Why choose us?" : "Pourquoi nous choisir?"}
         </h2>
         <div className="grid md:grid-cols-3 gap-8">
-          {content.benefits.map((b, i) => {
-            const Icon = iconMap[b.icon] || Zap;
+          {content.benefits.map((benefit, i) => {
+            const Icon = iconMap[benefit.icon] || Zap;
             return (
               <div
                 key={i}
@@ -30,8 +31,26 @@ export function BenefitsSection() {
                 <div className="w-14 h-14 rounded-xl bg-gradient-primary flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
                   <Icon className="h-7 w-7 text-primary-foreground" />
                 </div>
-                <h3 className="text-2xl font-display font-bold mb-3">{b.title[language]}</h3>
-                <p className="text-muted-foreground leading-relaxed">{b.description[language]}</p>
+                <EditableText
+                  value={benefit.title[language]}
+                  onSave={(v) => {
+                    const newBenefits = [...content.benefits];
+                    newBenefits[i] = { ...newBenefits[i], title: { ...newBenefits[i].title, [language]: v } };
+                    setContent((prev) => ({ ...prev, benefits: newBenefits }));
+                  }}
+                  as="h3"
+                  className="text-2xl font-display font-bold mb-3"
+                />
+                <EditableText
+                  value={benefit.description[language]}
+                  onSave={(v) => {
+                    const newBenefits = [...content.benefits];
+                    newBenefits[i] = { ...newBenefits[i], description: { ...newBenefits[i].description, [language]: v } };
+                    setContent((prev) => ({ ...prev, benefits: newBenefits }));
+                  }}
+                  as="p"
+                  className="text-muted-foreground leading-relaxed"
+                />
               </div>
             );
           })}

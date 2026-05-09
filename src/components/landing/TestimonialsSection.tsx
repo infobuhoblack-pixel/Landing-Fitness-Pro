@@ -1,10 +1,11 @@
 import { useSite } from "@/contexts/SiteContext";
+import { EditableText } from "./EditableText";
 import { Star, Quote } from "lucide-react";
 import { useRef } from "react";
 import { useInView } from "@/hooks/useInView";
 
 export function TestimonialsSection() {
-  const { content, language } = useSite();
+  const { content, setContent, language } = useSite();
   const ref = useRef<HTMLElement>(null);
   const inView = useInView(ref);
 
@@ -15,7 +16,7 @@ export function TestimonialsSection() {
           {language === "es" ? "Testimonios" : language === "en" ? "Testimonials" : "Témoignages"}
         </h2>
         <div className="grid md:grid-cols-3 gap-8 max-w-5xl mx-auto">
-          {content.testimonials.map((t, i) => (
+          {content.testimonials.map((testimonial, i) => (
             <div
               key={i}
               className={`p-8 rounded-2xl bg-card border border-border/50 hover:border-primary/30 transition-all duration-300 ${
@@ -24,15 +25,24 @@ export function TestimonialsSection() {
               style={{ animationDelay: `${i * 150}ms` }}
             >
               <Quote className="h-8 w-8 text-primary/30 mb-4" />
-              <p className="text-foreground mb-6 leading-relaxed italic">{t.text[language]}</p>
+              <EditableText
+                value={testimonial.text[language]}
+                onSave={(v) => {
+                  const t = [...content.testimonials];
+                  t[i] = { ...t[i], text: { ...t[i].text, [language]: v } };
+                  setContent((prev) => ({ ...prev, testimonials: t }));
+                }}
+                as="p"
+                className="text-foreground mb-6 leading-relaxed italic"
+              />
               <div className="flex items-center gap-3">
                 <div className="w-12 h-12 rounded-full bg-gradient-primary flex items-center justify-center text-primary-foreground font-bold text-sm">
-                  {t.initials}
+                  {testimonial.initials}
                 </div>
                 <div>
-                  <p className="font-bold text-foreground">{t.name}</p>
+                  <p className="font-bold text-foreground">{testimonial.name}</p>
                   <div className="flex gap-0.5">
-                    {Array.from({ length: t.rating }).map((_, si) => (
+                    {Array.from({ length: testimonial.rating }).map((_, si) => (
                       <Star key={si} className="h-4 w-4 text-secondary fill-current" />
                     ))}
                   </div>
