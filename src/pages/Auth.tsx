@@ -17,16 +17,16 @@ const schema = z.object({
 
 export default function Auth() {
   const navigate = useNavigate();
-  const { session, isAdmin, loading, authReady } = useAuth();
+  const { session, isAdmin, loading } = useAuth();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [busy, setBusy] = useState(false);
 
   useEffect(() => {
-    if (!loading && authReady && session) {
+    if (!loading && session) {
       navigate(isAdmin ? "/admin" : "/", { replace: true });
     }
-  }, [session, isAdmin, loading, authReady, navigate]);
+  }, [session, isAdmin, loading, navigate]);
 
   const handle = async (mode: "signin" | "signup") => {
     const parsed = schema.safeParse({ email, password });
